@@ -56,7 +56,7 @@ func server() {
 		if nOob == 0 {
 			log.Fatalf("bad nOob = %d", nread)
 		}
-		fmt.Println(string(buf))
+		// fmt.Println(string(buf))
 		// nwrite, err := conn.Write(buf)
 		// if err != nil {
 		// 	log.Panicln(err)

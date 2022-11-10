@@ -17,7 +17,7 @@ var NumPings = flag.Int("n", 1_000_000, "Number of pings to measure")
 var UnixAddress = "/tmp/test.sock"
 
 func domainAndAddress() (string, string) {
-	return "unix", UnixAddress
+	return "unixgram", UnixAddress
 }
 
 func server() {

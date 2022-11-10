@@ -61,15 +61,12 @@ func server() {
 				log.Fatalf("bad nOob = %d", nread)
 			}
 		} else {
-			nread, nOob, _, _, err := conn.ReadMsgUnix(buf, oob)
+			nread, _, _, _, err := conn.ReadMsgUnix(buf, oob)
 			if err != nil {
 				log.Panicln(err)
 			}
 			if nread != *MsgSize {
 				log.Fatalf("bad nread = %d", nread)
-			}
-			if nOob == 0 {
-				log.Fatalf("bad nOob = %d", nread)
 			}
 		}
 		// fmt.Println(string(buf))

@@ -94,6 +94,7 @@ func main() {
 	}
 
 	buf := make([]byte, *MsgSize)
+	copy(buf, "some data :)")
 	t1 := time.Now()
 	for n := 0; n < *NumPings; n++ {
 		nwrite, err := conn.Write(buf)

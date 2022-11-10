@@ -56,6 +56,7 @@ func server() {
 		if nOob == 0 {
 			log.Fatalf("bad nOob = %d", nread)
 		}
+		fmt.Println(string(buf))
 		// nwrite, err := conn.Write(buf)
 		// if err != nil {
 		// 	log.Panicln(err)
@@ -102,13 +103,13 @@ func main() {
 		if nwrite != *MsgSize {
 			log.Fatalf("bad nwrite = %d", nwrite)
 		}
-		nread, err := conn.Read(buf)
-		if err != nil {
-			log.Panicln(err)
-		}
-		if nread != *MsgSize {
-			log.Fatalf("bad nread = %d", nread)
-		}
+		// nread, err := conn.Read(buf)
+		// if err != nil {
+		// 	log.Panicln(err)
+		// }
+		// if nread != *MsgSize {
+		// 	log.Fatalf("bad nread = %d", nread)
+		// }
 	}
 	elapsed := time.Since(t1)
 

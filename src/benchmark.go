@@ -56,13 +56,13 @@ func server() {
 		if nOob == 0 {
 			log.Fatalf("bad nOob = %d", nread)
 		}
-		nwrite, err := conn.Write(buf)
-		if err != nil {
-			log.Panicln(err)
-		}
-		if nwrite != *MsgSize {
-			log.Fatalf("bad nwrite = %d", nwrite)
-		}
+		// nwrite, err := conn.Write(buf)
+		// if err != nil {
+		// 	log.Panicln(err)
+		// }
+		// if nwrite != *MsgSize {
+		// 	log.Fatalf("bad nwrite = %d", nwrite)
+		// }
 	}
 
 	time.Sleep(50 * time.Millisecond)

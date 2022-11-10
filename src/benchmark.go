@@ -30,16 +30,16 @@ func server() {
 	domain, address := domainAndAddress()
 	unixAddress, err := net.ResolveUnixAddr("unixgram", address)
 	if err != nil {
-		log.Fatal("could not resolve unix gram")
+		log.Panicln("could not resolve unix gram")
 	}
 	conn, err := net.ListenUnixgram(domain, unixAddress)
 	if err != nil {
-		log.Fatal(err)
+		log.Panicln(err)
 	}
 
 	enableUDSPassCred(conn)
 	if err != nil {
-		log.Fatal(err)
+		log.Panicln(err)
 	}
 	defer conn.Close()
 
@@ -48,7 +48,7 @@ func server() {
 	for n := 0; n < *NumPings; n++ {
 		nread, nOob, _, _, err := conn.ReadMsgUnix(buf, oob)
 		if err != nil {
-			log.Fatal(err)
+			log.Panicln(err)
 		}
 		if nread != *MsgSize {
 			log.Fatalf("bad nread = %d", nread)
@@ -58,7 +58,7 @@ func server() {
 		}
 		nwrite, err := conn.Write(buf)
 		if err != nil {
-			log.Fatal(err)
+			log.Panicln(err)
 		}
 		if nwrite != *MsgSize {
 			log.Fatalf("bad nwrite = %d", nwrite)
@@ -89,7 +89,7 @@ func main() {
 	domain, address := domainAndAddress()
 	conn, err := net.Dial(domain, address)
 	if err != nil {
-		log.Fatal(err)
+		log.Panicln(err)
 	}
 
 	buf := make([]byte, *MsgSize)
@@ -97,14 +97,14 @@ func main() {
 	for n := 0; n < *NumPings; n++ {
 		nwrite, err := conn.Write(buf)
 		if err != nil {
-			log.Fatal(err)
+			log.Panicln(err)
 		}
 		if nwrite != *MsgSize {
 			log.Fatalf("bad nwrite = %d", nwrite)
 		}
 		nread, err := conn.Read(buf)
 		if err != nil {
-			log.Fatal(err)
+			log.Panicln(err)
 		}
 		if nread != *MsgSize {
 			log.Fatalf("bad nread = %d", nread)

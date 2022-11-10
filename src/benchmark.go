@@ -13,6 +13,7 @@ import (
 var UnixDomain = flag.Bool("unixdomain", true, "Use Unix domain sockets")
 var MsgSize = flag.Int("msgsize", 128, "Message size in each ping")
 var NumPings = flag.Int("n", 1_000_000, "Number of pings to measure")
+var UseAncillaryData = flag.Bool("useAncillaryData", false, "Use ancillary data")
 
 var UnixAddress = "/tmp/test.sock"
 
@@ -37,24 +38,36 @@ func server() {
 		log.Panicln(err)
 	}
 
-	enableUDSPassCred(conn)
-	if err != nil {
-		log.Panicln(err)
+	if *UseAncillaryData {
+		enableUDSPassCred(conn)
+		if err != nil {
+			log.Panicln(err)
+		}
 	}
 	defer conn.Close()
 
 	buf := make([]byte, *MsgSize)
 	oob := make([]byte, *MsgSize)
 	for n := 0; n < *NumPings; n++ {
-		nread, nOob, _, _, err := conn.ReadMsgUnix(buf, oob)
-		if err != nil {
-			log.Panicln(err)
-		}
-		if nread != *MsgSize {
-			log.Fatalf("bad nread = %d", nread)
-		}
-		if nOob == 0 {
-			log.Fatalf("bad nOob = %d", nread)
+		if *UseAncillaryData {
+			nread, nOob, _, _, err := conn.ReadMsgUnix(buf, oob)
+			if err != nil {
+				log.Panicln(err)
+			}
+			if nread != *MsgSize {
+				log.Fatalf("bad nread = %d", nread)
+			}
+			if nOob == 0 {
+				log.Fatalf("bad nOob = %d", nread)
+			}
+		} else {
+			nread, _, err := conn.ReadFromUnix(buf)
+			if err != nil {
+				log.Panicln(err)
+			}
+			if nread != *MsgSize {
+				log.Fatalf("bad nread = %d", nread)
+			}
 		}
 		// fmt.Println(string(buf))
 		// nwrite, err := conn.Write(buf)

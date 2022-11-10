@@ -3,13 +3,14 @@ package main
 import (
 	"flag"
 	"fmt"
+	"golang.org/x/sys/unix"
 	"log"
 	"net"
 	"os"
 	"time"
 )
 
-var UnixDomain = flag.Bool("unixdomain", false, "Use Unix domain sockets")
+var UnixDomain = flag.Bool("unixdomain", true, "Use Unix domain sockets")
 var MsgSize = flag.Int("msgsize", 128, "Message size in each ping")
 var NumPings = flag.Int("n", 1_000_000, "Number of pings to measure")
 
@@ -27,26 +28,33 @@ func server() {
 	}
 
 	domain, address := domainAndAddress()
-	l, err := net.Listen(domain, address)
+	unixAddress, err := net.ResolveUnixAddr("unixgram", address)
+	if err != nil {
+		log.Fatal("could not resolve unix gram")
+	}
+	conn, err := net.ListenUnixgram(domain, unixAddress)
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer l.Close()
 
-	conn, err := l.Accept()
+	enableUDSPassCred(conn)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer conn.Close()
 
 	buf := make([]byte, *MsgSize)
+	oob := make([]byte, *MsgSize)
 	for n := 0; n < *NumPings; n++ {
-		nread, err := conn.Read(buf)
+		nread, nOob, _, _, err := conn.ReadMsgUnix(buf, oob)
 		if err != nil {
 			log.Fatal(err)
 		}
 		if nread != *MsgSize {
 			log.Fatalf("bad nread = %d", nread)
+		}
+		if nOob == 0 {
+			log.Fatalf("bad nOob = %d", nread)
 		}
 		nwrite, err := conn.Write(buf)
 		if err != nil {
@@ -58,6 +66,17 @@ func server() {
 	}
 
 	time.Sleep(50 * time.Millisecond)
+}
+
+func enableUDSPassCred(conn *net.UnixConn) error {
+	rawconn, err := conn.SyscallConn()
+	if err != nil {
+		return err
+	}
+
+	return rawconn.Control(func(fd uintptr) {
+		unix.SetsockoptInt(int(fd), unix.SOL_SOCKET, unix.SO_PASSCRED, 1) //nolint:errcheck
+	})
 }
 
 func main() {
